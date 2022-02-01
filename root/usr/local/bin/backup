@@ -1,0 +1,58 @@
+#!/bin/bash
+. /usr/local/bin/with-env
+set -eo pipefail
+
+function logf() { echo "$(logging "BACKUP" "$1")"; }
+
+if pidof -o %PPID -x "$(basename "$0")">/dev/null; then
+  logf "Already in progress. Aborting!"
+	exit 3
+fi
+
+trap run_exit_commands EXIT
+
+run_commands "${PRE_COMMANDS:-}"
+
+tags="$(echo "$RESTIC_BACKUP_TAGS" | tr "," "\n")"
+tag_options=""
+for tag in $tags; do
+  tag_options="${tag_options} --tag $tag"
+done
+
+stime="$(date +%s)"
+logf "Starting backup..."
+
+set +e
+exec 5>&1
+res=$(restic backup ${RESTIC_BACKUP_SOURCES} \
+	${RESTIC_BACKUP_ARGS:-} ${tag_options} 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+rc=$?
+set -e
+
+send_message "New Restic Backup" "${rc}" "${res}" &> /dev/null
+if [ $rc -ne 0 ]; then
+  if [ $rc -eq 3 ] && [ -n "${POST_COMMANDS_INCOMPLETE:-}" ]; then
+    run_commands "${POST_COMMANDS_INCOMPLETE:-}"
+  else
+    run_commands "${POST_COMMANDS_FAILURE:-}"
+  fi
+	exit $rc
+fi
+
+logf "New snapshot successfully created"
+
+if [ -n "${RESTIC_FORGET_ARGS}" ]; then
+  logf "Forgetting about old snapshots based on RESTIC_FORGET_ARGS"
+  exec 5>&1
+  res=$(restic forget ${tag_options} ${RESTIC_FORGET_ARGS} 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+  rc=$?
+  if [ $rc -ne 0 ]; then
+    send_message "Restic Forget" "${rc}" "${res}" &> /dev/null
+    run_commands "${POST_COMMANDS_FAILURE:-}"
+    exit $rc
+  fi
+fi
+
+logf "Finished backup in $(humanReadableDuration $stime)"
+
+run_commands "${POST_COMMANDS_SUCCESS:-}"

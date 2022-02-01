@@ -1,0 +1,64 @@
+#!/bin/bash
+
+function logging() {
+  if [ "$#" -ge 2 ]; then
+    local name="$1"
+    local msg="$2"
+  else
+    local name=""
+    local msg="$1"
+  fi
+  echo "$(date "$(printenv DATE_FORMAT)") $(printf "%-6s:" "$name") $msg"
+}
+
+function run_commands {
+  COMMANDS=$1
+  while IFS= read -r cmd; do echo $cmd && eval $cmd ; done < <(printf '%s\n' "$COMMANDS")
+}
+
+function run_exit_commands {
+  set +e
+  set +o pipefail
+  run_commands "${POST_COMMANDS_EXIT:-}"
+}
+
+function send_message() {
+  if [ -z "${DISCORD_WEBHOOK:-}" ]; then
+    return
+  fi
+  local title="$1"
+  local exitcode=$2
+  local desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
+
+  host="${RESTIC_HOST:-"$(cat /etc/hostname)"}"
+  color=$(if [ $exitcode -eq 0 ]; then echo "3066993"; else "15158332"; fi)
+  if [ $exitcode -eq 0 ]; then
+    footer="Successful on '$host'"
+  else
+    footer="Failed at '$host'. EXITCODE: ${exitcode}"
+  fi
+
+  curl -X POST $DISCORD_WEBHOOK \
+    -H "Content-Type: application/json" \
+    -d@- << EOF
+{
+  "embeds": [{
+    "title": "${title}",
+    "color": ${color},
+    "description": "${desc}",
+    "footer": {
+      "text": "${footer}"
+    }
+  }]
+}    
+EOF
+}
+
+function humanReadableDuration() {
+  local stime="$1"
+  etime=$(echo "$(date +%s) - $stime" | bc -l)
+  hh=$((etime / 3600))
+  mm=$(((etime % 3600) / 60))
+  ss=$(((etime % 3600) % 60))
+  echo "$(printf "%02d:%02d:%02d" "$hh" "$mm" "$ss")"
+}
