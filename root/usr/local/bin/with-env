@@ -31,12 +31,14 @@ function send_message() {
   local desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
 
   host="${RESTIC_HOST:-"$(cat /etc/hostname)"}"
-  color=$(if [ $exitcode -eq 0 ]; then echo "3066993"; else "15158332"; fi)
   if [ $exitcode -eq 0 ]; then
-    footer="Successful on '$host'"
+    color="3066993"
+  elif [ $exitcode -eq 1 ]; then
+    color="15158332"
   else
-    footer="Failed at '$host'. EXITCODE: ${exitcode}"
+    color="15105570"
   fi
+  footer="'$host' (${exitcode})"
 
   curl -X POST $DISCORD_WEBHOOK \
     -H "Content-Type: application/json" \

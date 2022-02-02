@@ -103,10 +103,10 @@ RUN \
 ENV LANG=C.UTF-8 \
     PS1="\u@\h:\w\\$ " \
     DATE_FORMAT="+%4Y/%m/%d %H:%M:%S" \
+    RCLONE_TPSLIMIT=3 \
     RCLONE_CONFIG_PATH=/run/secrets/rclone.conf \
     SSH_CONFIG_PATH=/run/secrets/.ssh \
-    RESTIC_CACHE_DIR=/cache \
-    RESTIC_BACKUP_SOURCES=/data
+    RESTIC_CACHE_DIR=/cache
 
 VOLUME /config /cache
 WORKDIR /config

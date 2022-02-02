@@ -2,10 +2,10 @@
 . /usr/local/bin/with-env
 set -euo pipefail
 
-function logf() { echo "$(logging "CHECK" "$1")"; }
+function logf() { logging "CHECK" "$1"; }
 
 if pidof -o %PPID -x "$(basename "$0")">/dev/null; then
-  logf "Already in progress. Aborting!"
+  >&2 logf "Already in progress. Aborting!"
 	exit 3
 fi
 

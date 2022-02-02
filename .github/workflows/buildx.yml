@@ -41,9 +41,7 @@ jobs:
             --platform=linux/amd64 \
             --load \
             .
-          CID=$(docker run -d ${{ env.TARGET_IMAGE }}:testing)
-          VER=$(docker exec $CID restic version | awk '{print $2}')
-          docker rm -f $CID
+          VER=$(docker run --rm ${{ env.TARGET_IMAGE }}:testing version | awk '{print $2}')
           echo "APP_VER=$VER" >> $GITHUB_ENV
       -
         name: Login to ghcr.io

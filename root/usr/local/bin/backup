@@ -2,11 +2,16 @@
 . /usr/local/bin/with-env
 set -eo pipefail
 
-function logf() { echo "$(logging "BACKUP" "$1")"; }
+function logf() { logging "BACKUP" "$1"; }
 
 if pidof -o %PPID -x "$(basename "$0")">/dev/null; then
-  logf "Already in progress. Aborting!"
+  >&2 logf "Already in progress. Aborting!"
 	exit 3
+fi
+
+if [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
+  >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
+  exit 1
 fi
 
 trap run_exit_commands EXIT
