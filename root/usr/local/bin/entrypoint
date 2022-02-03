@@ -28,22 +28,24 @@ if [[ -z "${RESTIC_PASSWORD:-}" ]]; then
   exit 1
 fi
 
-if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${PRUNE_CRON:-}" ]]; then
-  >&2 logf "BACKUP_CRON and PRUNE_CRON are mutually exclusive. Please check your configuration. Exiting..."
-  exit 1
-fi
-if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
-  >&2 logf "BACKUP_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
-  exit 1
-fi
-if [[ -n "${PRUNE_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
-  >&2 logf "PRUNE_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
-  exit 1
-fi
+if [ "${INIT_CHECK_CRON}" = "true" ]; then
+  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${PRUNE_CRON:-}" ]]; then
+    >&2 logf "BACKUP_CRON and PRUNE_CRON are mutually exclusive. Please check your configuration. Exiting..."
+    exit 1
+  fi
+  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
+    >&2 logf "BACKUP_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
+    exit 1
+  fi
+  if [[ -n "${PRUNE_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
+    >&2 logf "PRUNE_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
+    exit 1
+  fi
 
-if [[ -n "${BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
-  >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
-  exit 1
+  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
+    >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
+    exit 1
+  fi
 fi
 
 logf "Checking repository at '${RESTIC_REPOSITORY}'..."
@@ -53,32 +55,46 @@ else
   exit 1
 fi
 
+# scheduling by go-cron
 if [[ -n "${BACKUP_CRON:-}" ]]; then
-  if [ "${RUN_ON_STARTUP:-}" == "true" ]; then
-    logf "Executing backup on startup..."
+  logf "Scheduling backup job according to BACKUP_CRON..."
+  go-cron "$BACKUP_CRON" /usr/local/bin/backup &
+  sleep 2
+fi
+if [[ -n "${PRUNE_CRON:-}" ]]; then
+  logf "Scheduling prune job according to PRUNE_CRON..."
+  go-cron "$PRUNE_CRON" /usr/local/bin/prune &
+  sleep 2
+fi
+if [[ -n "${CHECK_CRON:-}" ]]; then
+  logf "Scheduling check job according to CHECK_CRON..."
+  go-cron "$CHECK_CRON" /usr/local/bin/check &
+  sleep 2
+fi
+
+# run on startup
+if [ "${RUN_ON_STARTUP:-}" == "true" ]; then
+  if [ -n "${BACKUP_CRON:-}" ]; then
+    logf "Executing backup on startup in 3s..."
+    sleep 3
     /usr/local/bin/backup
   fi
-  logf "Scheduling backup job according to BACKUP_CRON..."
-  exec go-cron "$BACKUP_CRON" /usr/local/bin/backup
-fi
-
-if [[ -n "${PRUNE_CRON:-}" ]]; then
-  if [ "${RUN_ON_STARTUP:-}" == "true" ]; then
-    logf "Executing prune job on startup..."
+  if [ -n "${PRUNE_CRON:-}" ]; then
+    logf "Executing prune job on startup in 3s..."
+    sleep 3
     /usr/local/bin/prune
   fi
-  logf "Scheduling prune job according to PRUNE_CRON..."
-  exec go-cron "$PRUNE_CRON" /usr/local/bin/prune
-fi
-
-if [[ -n "${CHECK_CRON:-}" ]]; then
-  if [ "${RUN_ON_STARTUP:-}" == "true" ]; then
-    logf "Executing check job on startup..."
+  if [ -n "${CHECK_CRON:-}" ]; then
+    logf "Executing check job on startup in 3s..."
+    sleep 3
     /usr/local/bin/check
   fi
-  logf "Scheduling check job according to CHECK_CRON..."
-  exec go-cron "$CHECK_CRON" /usr/local/bin/check
 fi
 
->&2 logf "No valid operating mode configured! Exiting..."
-exit 1
+if [[ -n "${BACKUP_CRON:-}" ]] || [[ -n "${PRUNE_CRON:-}" ]] || [[ -n "${CHECK_CRON:-}" ]]; then
+  logf "Completed. Waiting for scheduled jobs..."
+  wait
+else
+  >&2 logf "No valid operating mode configured! Exiting..."
+  exit 1
+fi

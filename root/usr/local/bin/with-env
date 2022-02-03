@@ -23,14 +23,14 @@ function run_exit_commands {
 }
 
 function send_message() {
-  if [ -z "${DISCORD_WEBHOOK:-}" ]; then
+  if [ -z "${DISCORD_WEBHOOK_URL:-}" ]; then
     return
   fi
   local title="$1"
   local exitcode=$2
   local desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
 
-  host="${RESTIC_HOST:-"$(cat /etc/hostname)"}"
+  host="${DISCORD_MSG_HOST:-"$(cat /etc/hostname)"}"
   if [ $exitcode -eq 0 ]; then
     color="3066993"
   elif [ $exitcode -eq 1 ]; then
@@ -38,9 +38,9 @@ function send_message() {
   else
     color="15105570"
   fi
-  footer="'$host' (${exitcode})"
+  footer="exited with ${exitcode} at '$host'"
 
-  curl -X POST $DISCORD_WEBHOOK \
+  curl -X POST $DISCORD_WEBHOOK_URL \
     -H "Content-Type: application/json" \
     -d@- << EOF
 {
