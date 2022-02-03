@@ -19,9 +19,12 @@ main() {
   stime=$(date +%s)
   logf "Starting check..."
 
+  restic_cmd="restic check ${RESTIC_CHECK_ARGS:-}"
+  logf "$restic_cmd"
+
   set +e
   exec 5>&1
-  res=$(restic check ${RESTIC_CHECK_ARGS:-} 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+  res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
   rc=$?
   set -e
 

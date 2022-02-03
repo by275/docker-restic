@@ -22,19 +22,15 @@ trap run_exit_commands EXIT
 
 run_commands "${PRE_COMMANDS:-}"
 
-tags="$(echo "$RESTIC_BACKUP_TAGS" | tr "," "\n")"
-tag_options=""
-for tag in $tags; do
-  tag_options="${tag_options} --tag $tag"
-done
-
 stime="$(date +%s)"
 logf "Starting backup..."
 
+restic_cmd="restic backup ${RESTIC_BACKUP_SOURCES} ${RESTIC_BACKUP_ARGS:-}"
+logf "$restic_cmd"
+
 set +e
 exec 5>&1
-res=$(restic backup ${RESTIC_BACKUP_SOURCES} \
-	${RESTIC_BACKUP_ARGS:-} ${tag_options} 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
 rc=$?
 set -e
 
@@ -52,8 +48,10 @@ logf "New snapshot successfully created"
 
 if [ -n "${RESTIC_FORGET_ARGS}" ]; then
   logf "Forgetting about old snapshots based on RESTIC_FORGET_ARGS"
+  restic_cmd="restic forget ${RESTIC_FORGET_ARGS:-}"
+  logf "$restic_cmd"
   exec 5>&1
-  res=$(restic forget ${tag_options} ${RESTIC_FORGET_ARGS} 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+  res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
   rc=$?
   if [ $rc -ne 0 ]; then
     send_message "Restic Forget" "${rc}" "${res}" &> /dev/null
