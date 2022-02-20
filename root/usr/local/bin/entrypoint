@@ -23,8 +23,8 @@ if [[ -z "${RESTIC_REPOSITORY:-}" ]]; then
   >&2 logf "Please set RESTIC_REPOSITORY to proceed. Exiting..."
   exit 1
 fi
-if [[ -z "${RESTIC_PASSWORD:-}" ]]; then
-  >&2 logf "Please set RESTIC_PASSWORD to proceed. Exiting..."
+if [[ -z "${RESTIC_PASSWORD:-}" ]] && [[ -z "${RESTIC_PASSWORD_FILE:-}" ]]; then
+  >&2 logf "Please set RESTIC_PASSWORD or RESTIC_PASSWORD_FILE to proceed. Exiting..."
   exit 1
 fi
 
