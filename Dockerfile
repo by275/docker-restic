@@ -1,71 +1,37 @@
 ARG ALPINE_VER=3.15
-ARG GOLANG_VER=1.16
+
+FROM alpine:${ALPINE_VER} AS alpine
+FROM ghcr.io/by275/prebuilt:alpine${ALPINE_VER} AS prebuilt
+
 #
-# build stage
+# BUILD
 #
-FROM golang:${GOLANG_VER}-alpine${ALPINE_VER} AS builder
+FROM alpine AS builder
 
-ARG TARGETARCH
-
-RUN mkdir -p /bar
-
-ENV GOBIN=/bar/usr/local/bin
-
-RUN \
-    echo "**** install build packages ****" && \
-    apk add --update --no-cache curl unzip bash
-
-ARG GO_CRON_VERSION=0.0.4
-ARG GO_CRON_SHA256=6c8ac52637150e9c7ee88f43e29e158e96470a3aaa3fcf47fd33771a8a76d959
-
-RUN \
-    echo "**** build go-cron v${GO_CRON_VERSION} ****" && \
-    curl -sL -o go-cron.tar.gz https://github.com/djmaze/go-cron/archive/v${GO_CRON_VERSION}.tar.gz && \
-    echo "${GO_CRON_SHA256}  go-cron.tar.gz" | sha256sum -c - && \
-    tar xzf go-cron.tar.gz && \
-    cd go-cron-${GO_CRON_VERSION} && \
-    go install
+RUN mkdir -p /bar/usr/local/bin
 
 RUN \
     echo "**** add rclone ****" && \
+    apk add --update --no-cache curl unzip bash && \
     curl -fsSL https://rclone.org/install.sh | bash && \
     mv $(which rclone) /bar/usr/local/bin/
 
-ARG RESTIC_VERSION=0.12.1
-ARG RESTIC_SHA256_AMD64=11d6ee35ec73058dae73d31d9cd17fe79661090abeb034ec6e13e3c69a4e7088
-ARG RESTIC_SHA256_ARM=f27c3b271ad36896e22e411dea4c1c14d5ec75a232538c62099771ab7472765a
-ARG RESTIC_SHA256_ARM64=c7e58365d0b888a60df772e7857ce8a0b53912bbd287582e865e3c5e17db723f
-
-RUN case "$TARGETARCH" in \
-    amd64 ) \
-        echo "${RESTIC_SHA256_AMD64}" > RESTIC_SHA256 ; \
-        ;; \
-    arm ) \
-        echo "${RESTIC_SHA256_ARM}" > RESTIC_SHA256 ; \
-        ;; \
-    arm64 ) \
-        echo "${RESTIC_SHA256_ARM64}" > RESTIC_SHA256 ; \
-        ;; \
-    *) \
-        echo "unknown architecture '${TARGETARCH}'" ; \
-        exit 1 ; \
-        ;; \
-    esac
-
 RUN \
     echo "**** add restic ****" && \
-    curl -sL --fail -o restic.bz2 https://github.com/restic/restic/releases/download/v${RESTIC_VERSION}/restic_${RESTIC_VERSION}_linux_${TARGETARCH}.bz2 && \
-    echo "$(cat RESTIC_SHA256)  restic.bz2" | sha256sum -c - && \
-    bzip2 -d -v restic.bz2 && \
-    mv restic /bar/usr/local/bin/restic
+    apk add --update --no-cache restic && \
+    restic self-update && \
+    mv $(which restic) /bar/usr/local/bin/
 
 # add local files
 COPY root/ /bar/
 
+# add go-cron
+COPY --from=prebuilt /go/bin/go-cron /bar/usr/local/bin/
+
 #
-# Final image
+# RELEASE
 #
-FROM alpine:${ALPINE_VER}
+FROM alpine
 LABEL maintainer="by275"
 LABEL org.opencontainers.image.source https://github.com/by275/docker-restic
 

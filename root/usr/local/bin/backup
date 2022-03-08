@@ -6,11 +6,11 @@ function logf() { logging "BACKUP" "$1"; }
 
 if pidof -o %PPID -x "$(basename "$0")">/dev/null; then
   >&2 logf "Already in progress. Aborting!"
-	exit 3
+  exit 3
 fi
 if pidof -o %PPID -x restic>/dev/null; then
   >&2 logf "'restic' process is still running. Aborting!"
-	exit 3
+  exit 3
 fi
 
 if [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
@@ -41,7 +41,7 @@ if [ $rc -ne 0 ]; then
   else
     run_commands "${POST_COMMANDS_FAILURE:-}"
   fi
-	exit $rc
+  exit $rc
 fi
 
 logf "New snapshot successfully created"
