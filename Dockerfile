@@ -1,7 +1,7 @@
 ARG ALPINE_VER=3.15
 
 FROM alpine:${ALPINE_VER} AS alpine
-FROM ghcr.io/by275/prebuilt:alpine${ALPINE_VER} AS prebuilt
+FROM ghcr.io/by275/base:alpine${ALPINE_VER} AS prebuilt
 
 #
 # BUILD

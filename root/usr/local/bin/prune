@@ -43,12 +43,12 @@ main() {
   rc=$?
   set -e
 
-  send_message "Restic Prune" "${rc}" "${res}" &> /dev/null  
+  send_message "Restic Prune" "${rc}" "${res}" &> /dev/null
   if [ $rc -ne 0 ]; then
     run_commands "${POST_COMMANDS_FAILURE:-}"
     exit $rc
   fi
-  
+
   logf "Finished prune in $(humanReadableDuration $stime)"
 
   run_commands "${POST_COMMANDS_SUCCESS:-}"
