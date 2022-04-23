@@ -30,6 +30,7 @@ main() {
       run_commands "${POST_COMMANDS_FAILURE:-}"
       exit $rc
     fi
+    sleep 10s
   fi
 
   logf "Starting prune..."
