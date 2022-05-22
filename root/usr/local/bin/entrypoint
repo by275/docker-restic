@@ -28,24 +28,9 @@ if [[ -z "${RESTIC_PASSWORD:-}" ]] && [[ -z "${RESTIC_PASSWORD_FILE:-}" ]]; then
   exit 1
 fi
 
-if [ "${INIT_CHECK_CRON}" = "true" ]; then
-  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${PRUNE_CRON:-}" ]]; then
-    >&2 logf "BACKUP_CRON and PRUNE_CRON are mutually exclusive. Please check your configuration. Exiting..."
-    exit 1
-  fi
-  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
-    >&2 logf "BACKUP_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
-    exit 1
-  fi
-  if [[ -n "${PRUNE_CRON:-}" ]] && [[ -n "${CHECK_CRON:-}" ]]; then
-    >&2 logf "PRUNE_CRON and CHECK_CRON are mutually exclusive. Please check your configuration. Exiting..."
-    exit 1
-  fi
-
-  if [[ -n "${BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
-    >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
-    exit 1
-  fi
+if [[ -n "${BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
+  >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
+  exit 1
 fi
 
 logf "Checking repository at '${RESTIC_REPOSITORY}'..."
