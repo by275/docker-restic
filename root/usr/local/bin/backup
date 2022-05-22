@@ -47,8 +47,7 @@ fi
 logf "New snapshot successfully created"
 
 if [ -n "${RESTIC_FORGET_ARGS}" ]; then
-  logf "Forgetting about old snapshots based on RESTIC_FORGET_ARGS in 10s..."
-  sleep 10s
+  logf "Forgetting about old snapshots based on RESTIC_FORGET_ARGS"
   restic_cmd="restic forget ${RESTIC_FORGET_ARGS:-}"
   logf "$restic_cmd"
   exec 5>&1

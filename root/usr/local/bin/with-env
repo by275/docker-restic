@@ -13,7 +13,7 @@ function logging() {
 
 function run_commands {
   COMMANDS=$1
-  while IFS= read -r cmd; do echo $cmd && eval $cmd ; done < <(printf '%s\n' "$COMMANDS")
+  while IFS= read -r cmd; do echo "$cmd" && eval "$cmd" ; done < <(printf '%s\n' "$COMMANDS")
 }
 
 function run_exit_commands {
