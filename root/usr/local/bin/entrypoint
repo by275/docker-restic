@@ -28,7 +28,7 @@ if [[ -z "${RESTIC_PASSWORD:-}" ]] && [[ -z "${RESTIC_PASSWORD_FILE:-}" ]]; then
   exit 1
 fi
 
-if [[ -n "${BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
+if [[ -n "${RESTIC_BACKUP_CRON:-}" ]] && [[ -z "${RESTIC_BACKUP_SOURCES:-}" ]]; then
   >&2 logf "Please set RESTIC_BACKUP_SOURCES to proceed. Exiting..."
   exit 1
 fi
@@ -41,42 +41,42 @@ else
 fi
 
 # scheduling by go-cron
-if [[ -n "${BACKUP_CRON:-}" ]]; then
-  logf "Scheduling backup job according to BACKUP_CRON..."
-  go-cron "$BACKUP_CRON" /usr/local/bin/backup &
+if [[ -n "${RESTIC_BACKUP_CRON:-}" ]]; then
+  logf "Scheduling backup job according to RESTIC_BACKUP_CRON..."
+  go-cron "$RESTIC_BACKUP_CRON" /usr/local/bin/backup &
   sleep 2
 fi
-if [[ -n "${PRUNE_CRON:-}" ]]; then
-  logf "Scheduling prune job according to PRUNE_CRON..."
-  go-cron "$PRUNE_CRON" /usr/local/bin/prune &
+if [[ -n "${RESTIC_PRUNE_CRON:-}" ]]; then
+  logf "Scheduling prune job according to RESTIC_PRUNE_CRON..."
+  go-cron "$RESTIC_PRUNE_CRON" /usr/local/bin/prune &
   sleep 2
 fi
-if [[ -n "${CHECK_CRON:-}" ]]; then
-  logf "Scheduling check job according to CHECK_CRON..."
-  go-cron "$CHECK_CRON" /usr/local/bin/check &
+if [[ -n "${RESTIC_CHECK_CRON:-}" ]]; then
+  logf "Scheduling check job according to RESTIC_CHECK_CRON..."
+  go-cron "$RESTIC_CHECK_CRON" /usr/local/bin/check &
   sleep 2
 fi
 
 # run on startup
 if [ "${RUN_ON_STARTUP:-}" == "true" ]; then
-  if [ -n "${BACKUP_CRON:-}" ]; then
+  if [ -n "${RESTIC_BACKUP_CRON:-}" ]; then
     logf "Executing backup on startup in 3s..."
     sleep 3
     /usr/local/bin/backup
   fi
-  if [ -n "${PRUNE_CRON:-}" ]; then
+  if [ -n "${RESTIC_PRUNE_CRON:-}" ]; then
     logf "Executing prune job on startup in 3s..."
     sleep 3
     /usr/local/bin/prune
   fi
-  if [ -n "${CHECK_CRON:-}" ]; then
+  if [ -n "${RESTIC_CHECK_CRON:-}" ]; then
     logf "Executing check job on startup in 3s..."
     sleep 3
     /usr/local/bin/check
   fi
 fi
 
-if [[ -n "${BACKUP_CRON:-}" ]] || [[ -n "${PRUNE_CRON:-}" ]] || [[ -n "${CHECK_CRON:-}" ]]; then
+if [[ -n "${RESTIC_BACKUP_CRON:-}" ]] || [[ -n "${RESTIC_PRUNE_CRON:-}" ]] || [[ -n "${RESTIC_CHECK_CRON:-}" ]]; then
   logf "Completed. Waiting for scheduled jobs..."
   wait
 else
