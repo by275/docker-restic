@@ -28,15 +28,16 @@ COPY root/ /bar/
 # add go-cron
 COPY --from=prebuilt /go/bin/go-cron /bar/usr/local/bin/
 
+RUN \
+    echo "**** permissions ****" && \
+    chmod a+x /bar/usr/local/bin/*
+
 #
 # RELEASE
 #
 FROM alpine
 LABEL maintainer="by275"
 LABEL org.opencontainers.image.source https://github.com/by275/docker-restic
-
-# add build artifacts
-COPY --from=builder /bar/ /
 
 RUN \
     echo "**** install runtime packages ****" && \
@@ -57,13 +58,10 @@ RUN \
     echo "**** placeholder: rclone.config ****"  && \
     mkdir -p /root/.config/rclone && \
     echo "**** placeholder: sshkey ****"  && \
-    mkdir -p /root/.ssh && \
-    echo "**** permissions ****" && \
-    chmod a+x /usr/local/bin/* && \
-    echo "**** cleanup ****" && \
-    rm -rf \
-        /tmp/* \
-        /root/.cache
+    mkdir -p /root/.ssh
+
+# add build artifacts
+COPY --from=builder /bar/ /
 
 # environment settings
 ENV LANG=C.UTF-8 \
