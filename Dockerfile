@@ -49,6 +49,8 @@ RUN \
     mkdir -p \
         /bar/config \
         /bar/cache \
+        /bar/root/.ssh \
+        /bar/root/.config/rclone \
         && \
     echo "**** permissions ****" && \
     chmod a+x /bar/usr/local/bin/*
@@ -76,10 +78,6 @@ RUN \
         tzdata \
         && \
     sed -i 's/#user_allow_other/user_allow_other/' /etc/fuse.conf && \
-    echo "**** placeholder: rclone.config ****"  && \
-    mkdir -p /root/.config/rclone && \
-    echo "**** placeholder: sshkey ****"  && \
-    mkdir -p /root/.ssh && \
     echo "**** cleanup ****" && \
     rm -rf \
         /tmp/*
