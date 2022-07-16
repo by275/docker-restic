@@ -17,6 +17,22 @@ main() {
   run_commands "${PRE_COMMANDS:-}"
 
   stime="$(date +%s)"
+
+  if [ -n "${RESTIC_FORGET_ARGS:-}" ] && [ "${RESTIC_FORGET_BEFORE_PRUNE}" -eq 1 ]; then
+    logf "Forgetting about old snapshots based on RESTIC_FORGET_ARGS"
+    restic_cmd="restic forget ${RESTIC_FORGET_ARGS:-}"
+    logf "$restic_cmd"
+    exec 5>&1
+    res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+    rc=$?
+    if [ $rc -ne 0 ]; then
+      send_message "Restic Forget" "${rc}" "${res}" &> /dev/null
+      run_commands "${POST_COMMANDS_FAILURE:-}"
+      exit $rc
+    fi
+    sleep 10s
+  fi
+
   logf "Starting prune..."
 
   restic_cmd="restic prune ${RESTIC_PRUNE_ARGS:-}"

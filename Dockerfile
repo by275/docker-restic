@@ -94,6 +94,8 @@ ENV LANG=C.UTF-8 \
     RCLONE_TPSLIMIT=3 \
     RCLONE_CONFIG_PATH=/run/secrets/rclone.conf \
     SSH_CONFIG_PATH=/run/secrets/.ssh \
+    RESTIC_FORGET_AFTER_BACKUP=0 \
+    RESTIC_FORGET_BEFORE_PRUNE=1 \
     RESTIC_CACHE_DIR=/cache
 
 VOLUME /config /cache
