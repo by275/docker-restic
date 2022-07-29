@@ -1,0 +1,23 @@
+# linux common
+.cache
+
+# synology
+@eaDir
+*@SynoResource
+
+# python
+venv
+__pycache__
+
+# caches for plex media server
+Library/Application Support/Plex Media Server/Cache
+Library/Application Support/Plex Media Server/Plug-in Support/Caches
+
+# /home
+/home/*/Desktop
+/home/*/Documents
+/home/*/Downloads
+/home/*/go
+/home/*/shell-theme
+/home/*/snap
+/home/*/thinclient_drives
