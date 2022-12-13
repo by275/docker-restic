@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.16
+ARG ALPINE_VER=3.17
 
 FROM ghcr.io/by275/base:alpine AS prebuilt
 FROM alpine:${ALPINE_VER} AS base

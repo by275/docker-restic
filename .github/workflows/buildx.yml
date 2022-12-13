@@ -11,7 +11,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       -
         name: Checkout
@@ -62,10 +62,6 @@ jobs:
             ${{ env.TARGET_IMAGE }}:${{ env.VER_FULL }}
             ${{ env.TARGET_IMAGE }}:${{ env.VER_MINOR }}
             ${{ env.TARGET_IMAGE }}:${{ env.VER_MAJOR }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:latest
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_FULL }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_MINOR }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_MAJOR }}
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           push: true
       -
@@ -80,7 +76,3 @@ jobs:
             ${{ env.TARGET_IMAGE }}:${{ env.VER_FULL }}
             ${{ env.TARGET_IMAGE }}:${{ env.VER_MINOR }}
             ${{ env.TARGET_IMAGE }}:${{ env.VER_MAJOR }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:latest
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_FULL }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_MINOR }}
-            ghcr.io/${{ env.TARGET_IMAGE }}:${{ env.VER_MAJOR }}
