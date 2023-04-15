@@ -28,19 +28,20 @@ function send_message() {
   fi
   local title="$1"
   local exitcode=$2
-  local desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
+  local desc
+  desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
 
   host="${DISCORD_MSG_HOST:-"$(cat /etc/hostname)"}"
-  if [ $exitcode -eq 0 ]; then
+  if [ "$exitcode" -eq 0 ]; then
     color="3066993"
-  elif [ $exitcode -eq 1 ]; then
+  elif [ "$exitcode" -eq 1 ]; then
     color="15158332"
   else
     color="15105570"
   fi
   footer="exited with ${exitcode} at '$host'"
 
-  curl -X POST $DISCORD_WEBHOOK_URL \
+  curl -X POST "$DISCORD_WEBHOOK_URL" \
     -H "Content-Type: application/json" \
     -d@- << EOF
 {
@@ -62,5 +63,5 @@ function humanReadableDuration() {
   hh=$((etime / 3600))
   mm=$(((etime % 3600) / 60))
   ss=$(((etime % 3600) % 60))
-  echo "$(printf "%02d:%02d:%02d" "$hh" "$mm" "$ss")"
+  printf "%02d:%02d:%02d\n" "$hh" "$mm" "$ss"
 }

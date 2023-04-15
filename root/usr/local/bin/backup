@@ -30,7 +30,7 @@ logf "$restic_cmd"
 
 set +e
 exec 5>&1
-res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit "${PIPESTATUS[0]}")
 rc=$?
 set -e
 
@@ -51,7 +51,7 @@ if [ -n "${RESTIC_FORGET_ARGS}" ] && [ "${RESTIC_FORGET_AFTER_BACKUP}" -eq 1 ]; 
   restic_cmd="restic forget ${RESTIC_FORGET_ARGS:-}"
   logf "$restic_cmd"
   exec 5>&1
-  res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit ${PIPESTATUS[0]})
+  res=$(eval "$restic_cmd" 2>&1 |tee /dev/fd/5; exit "${PIPESTATUS[0]}")
   rc=$?
   if [ $rc -ne 0 ]; then
     send_message "Restic Forget" "${rc}" "${res}" &> /dev/null
@@ -60,6 +60,6 @@ if [ -n "${RESTIC_FORGET_ARGS}" ] && [ "${RESTIC_FORGET_AFTER_BACKUP}" -eq 1 ]; 
   fi
 fi
 
-logf "Finished backup in $(humanReadableDuration $stime)"
+logf "Finished backup in $(humanReadableDuration "$stime")"
 
 run_commands "${POST_COMMANDS_SUCCESS:-}"
