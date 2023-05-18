@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.17
+ARG ALPINE_VER=3.18
 
 FROM ghcr.io/by275/base:alpine AS prebuilt
 FROM alpine:${ALPINE_VER} AS base
@@ -23,9 +23,7 @@ FROM base AS restic
 RUN \
     echo "**** add restic ****" && \
     apk add --no-cache \
-        restic \
-        && \
-    restic self-update
+        restic
 
 #
 # COLLECT
