@@ -1,6 +1,7 @@
 ARG ALPINE_VER=3.18
 
 FROM ghcr.io/by275/base:alpine AS prebuilt
+FROM restic/restic:latest AS restic
 FROM alpine:${ALPINE_VER} AS base
 
 #
@@ -16,14 +17,6 @@ RUN \
         unzip \
         && \
     curl -fsSL https://rclone.org/install.sh | bash
-
-
-FROM base AS restic
-
-RUN \
-    echo "**** add restic ****" && \
-    apk add --no-cache \
-        restic
 
 #
 # COLLECT
