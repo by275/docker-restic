@@ -39,7 +39,7 @@ function send_message() {
   else
     color="15105570"
   fi
-  footer="exited with ${exitcode} at '$host'"
+  footer="restic@${host}"
 
   curl -X POST "$DISCORD_WEBHOOK_URL" \
     -H "Content-Type: application/json" \
@@ -48,9 +48,10 @@ function send_message() {
   "embeds": [{
     "title": "${title}",
     "color": ${color},
-    "description": "${desc}",
+    "description": "\`\`\`${desc}\`\`\`",
     "footer": {
-      "text": "${footer}"
+      "text": "${footer}",
+      "icon_url": "https://avatars.githubusercontent.com/u/10073512"
     }
   }]
 }
