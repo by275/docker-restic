@@ -26,6 +26,9 @@ stime="$(date +%s)"
 logf "Starting backup..."
 
 restic_cmd="restic backup ${RESTIC_BACKUP_SOURCES} ${RESTIC_BACKUP_ARGS:-}"
+if [ -n "${RESTIC_HOSTNAME:-}" ] && ! grep -wq -- '-H\|--host' <<< "${RESTIC_BACKUP_ARGS}"; then
+  restic_cmd="$restic_cmd --host=${RESTIC_HOSTNAME}"
+fi
 logf "$restic_cmd"
 
 set +e

@@ -31,7 +31,7 @@ function send_message() {
   local desc
   desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
 
-  host="${DISCORD_MSG_HOST:-"$(cat /etc/hostname)"}"
+  host="${RESTIC_HOSTNAME:-"$(cat /etc/hostname)"}"
   if [ "$exitcode" -eq 0 ]; then
     color="3066993"
   elif [ "$exitcode" -eq 1 ]; then
