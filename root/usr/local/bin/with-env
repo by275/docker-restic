@@ -31,7 +31,7 @@ function send_message() {
   local desc
   desc="$(echo "${3}" | awk '{print}' ORS='\\n')"
 
-  host="${RESTIC_HOSTNAME:-"$(cat /etc/hostname)"}"
+  hostname="${RESTIC_HOSTNAME:-"$(cat /etc/hostname)"}"
   if [ "$exitcode" -eq 0 ]; then
     color="3066993"
   elif [ "$exitcode" -eq 1 ]; then
@@ -39,7 +39,7 @@ function send_message() {
   else
     color="15105570"
   fi
-  footer="restic@${host}"
+  footer="$(restic version | awk '{print $1" "$2}')"
 
   curl -X POST "$DISCORD_WEBHOOK_URL" \
     -H "Content-Type: application/json" \
@@ -52,7 +52,19 @@ function send_message() {
     "footer": {
       "text": "${footer}",
       "icon_url": "https://avatars.githubusercontent.com/u/10073512"
-    }
+    },
+    "fields": [
+      {
+        "name": "Hostname",
+        "value": "\`${hostname}\`",
+        "inline": true
+      },
+      {
+        "name": "Repository",
+        "value": "\`${RESTIC_REPOSITORY}\`",
+        "inline": true
+      }
+    ]
   }]
 }
 EOF
