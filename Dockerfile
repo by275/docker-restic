@@ -59,10 +59,8 @@ RUN \
         bash \
         ca-certificates \
         curl \
-        docker-cli \
         fuse \
         gzip \
-        nfs-utils \
         openssh \
         procps \
         tini \
