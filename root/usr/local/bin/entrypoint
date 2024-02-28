@@ -9,7 +9,7 @@ if [[ -f "$RCLONE_CONFIG_PATH" ]]; then
 fi
 
 if [[ -d "$SSH_CONFIG_PATH" ]]; then
-  cp -r "${SSH_CONFIG_PATH}" /root/.ssh
+  cp -r "${SSH_CONFIG_PATH}"/. /root/.ssh
   chmod 700 /root/.ssh
   chmod -R u+rwX,go-rwx /root/.ssh
 fi
