@@ -1,4 +1,4 @@
-ARG ALPINE_VER=3.20
+ARG ALPINE_VER=3.21
 
 FROM ghcr.io/by275/base:alpine AS prebuilt
 FROM restic/restic:latest AS restic
